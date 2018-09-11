@@ -30,7 +30,7 @@ $(function() {
 			target_list = '#List'+list;
 			e.originalEvent.dataTransfer.effectAllowed = 'move';
 	    e.originalEvent.dataTransfer.setData("Text", e.target.getAttribute('id'));
-	    e.originalEvent.dataTransfer.setDragImage(e.target,0,0);
+	    // e.originalEvent.dataTransfer.setDragImage(e.target,0,0);
 	    droppable_Table(target_list);
 			return true;
 		}
@@ -53,23 +53,6 @@ $(function() {
 
 	});
 
-	// $('.draggable__row').on('dragend', function(e){
-	// 	console.log('Dragg ended');
-	// 	$('table__body').removeClass('validtarget');
-	// });
-
-	// $('#List1',).on('dragenter', function(e){
-	// 	e.originalEvent.stopPropagation();
- //    e.originalEvent.preventDefault();
- //    return false;
-	// });
-
-	// $('#List2').on('dragenter', function(e){
-	// 	e.originalEvent.stopPropagation();
- //    e.originalEvent.preventDefault();
- //    return false;
-	// });
-
 	$('#List1').on('dragover',function(e){
 		e.originalEvent.dataTransfer.dropEffect = "move";
 	  e.originalEvent.stopPropagation();
@@ -86,6 +69,7 @@ $(function() {
 
 	$('#List1').on('drop', function(e){
 		console.log('Freaking Dropped!');
+		dropAlbums();
 		$('#List2 .table__row').removeClass('selected');
 		$('.table__body').removeClass('validtarget');
 		$('.table__body .table__row').attr('draggable', true);
@@ -93,6 +77,7 @@ $(function() {
 
 	$('#List2').on('drop', function(e){
 		console.log('Freaking Drop!');
+		dropAlbums();
 		$('#List1 .table__row').removeClass('selected');
 		$('.table__body').removeClass('validtarget');
 		$('.table__body .table__row').attr('draggable', true);
@@ -225,10 +210,10 @@ $(function() {
 	// Updating Api Data
 
 	function updatingAlbumList(album, user) {
-		counter = Number(countElements(albumsList));
+		counter = Number(countElements(albums_List));
 		for( var i=0; i < counter; i++ ) {
-			 if ( albumsList[i].id == album ) {
-				albumsList[i].userId = user;
+			 if ( albums_List[i].id == album ) {
+				albums_List[i].userId = user;
 			 }
 		}
 	}
