@@ -1,3 +1,8 @@
+[type="checkbox"], [type="radio"] {
+	-webkit-appearance: none;
+	appearance: none;
+}
+
 body {
     font-family: 'Helvetica', 'Arial', sans-serif;
     padding: 0 50px;
@@ -6,6 +11,7 @@ body {
 
 main {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
 }
 
@@ -45,6 +51,7 @@ h1 {
     display: flex;
     padding: 5px;
     border-bottom: 1px solid #333;
+    position: relative;
 }
 .table__row:last-child {
     border-bottom: 0
@@ -53,6 +60,7 @@ h1 {
 .table__cell {
     margin-right: 10px;
 }
+
 .table__cell--short {
     flex-shrink: 0;
     width: 50px;
@@ -61,20 +69,16 @@ h1 {
     margin-right: 0px;
 }
 
-.table__body .draggable__row {
+..table__body.over {
+  border: 2px dashed #000;
+}
+
+.table__body .table__row {
 	cursor: move;
 }
 
-.table__body .draggable__row:hover {
-	background: #f2f2f2;
-	transform: scale(1.01);
-	padding-left: 15px;
-	outline: 2px solid #191970;
-	box-shadow: 10px 10px 5px #888;
-	-moz-box-shadow: 10px 10px 5px #888;
-	-webkit-box-shadow: 10px 10px 5px #888;
+.table__body .table__row:hover {
 	background-color: #A288A6;
-	color: #fff;
 }
 
 .table__body .table__row.selected {
@@ -88,3 +92,29 @@ h1 {
 .validtarget {
   background-color: lightblue;
 }
+
+.drop-albums {
+	display: block;
+	width: 500px;
+	height: 40px;
+	margin-top: 40px;
+}
+
+label {
+	font-size: 0;
+}
+.check__box {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	height: 10px;
+	width: 10px;
+	font-size: 0;
+	border: 1px solid #A288A6;
+	z-index: 1000;
+}
+
+.check__box:check {
+	color: white;
+}
+
