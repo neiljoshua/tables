@@ -75,6 +75,7 @@ h1 {
 
 .table__body .table__row {
 	cursor: move;
+	padding: 5px;
 }
 
 .table__body .table__row:hover {

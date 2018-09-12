@@ -1,19 +1,18 @@
 $(function() {
-	var users_List = [],
-			albums_List = [],
-			albums_Selected = [],
-			active_User,
-			drag_Src_El = null;
+	var users_list = [],
+			albums_list = [],
+			albums_selected = [],
+			active_user;
 
 	// Filter List of albums available in tables
 	// Filtering in table 1
-	$(document).on('keyup','#albumList1',function(){
+	$(document).on('keyup','#album-list1',function(){
 		var selected_Album = $(this).val();
 		filter1(selected_Album);
 	});
 
 	// Filtering in table 2
-	$(document).on('keyup','#albumList2',function(){
+	$(document).on('keyup','#album-list2',function(){
 		var selected_Album = $(this).val();
 		filter2(selected_Album);
 	});
@@ -22,87 +21,55 @@ $(function() {
 		dropAlbums();
 	});
 
-	$(document).on('dragstart', '.table__row', function(e) {
-		console.log('event', e );
-		if ( $(this).hasClass('selected') ) {
-			var list = (active_User == 1) ? 2 : 1;
-			origin_list = '#List'+active_User;
+	$(document).on('dragstart', '.draggable__row' ,function (e) {
+    var dt = e.originalEvent.dataTransfer;
+    dt.setData('Text', $(this).attr('id'));
+    e.originalEvent.dataTransfer.effectAllowed = 'move';
+    e.originalEvent.dataTransfer.setData("Text", e.target.getAttribute('id'));
+    console.log(e.originalEvent.dataTransfer.items.length)
+    debugger
+    if ( $(this).hasClass('selected') ) {
+			var list = (active_user == 1) ? 2 : 1;
 			target_list = '#List'+list;
-			e.originalEvent.dataTransfer.effectAllowed = 'move';
-	    e.originalEvent.dataTransfer.setData("Text", e.target.getAttribute('id'));
-	    // e.originalEvent.dataTransfer.setDragImage(e.target,0,0);
-	    droppable_Table(target_list);
-			return true;
-		}
+    	droppable_Table(target_list);
+    }
+    return true;
+  });
 
+	$(document).on('dragenter dragover drop', '.table__body',function(e){
+		console.log('albums on drag', albums_selected)
+		e.preventDefault();
+		if(e.type === 'drop') {
+			dropAlbums();
+		}
+	});
+
+	$(document).on('dragend','.draggable__row', function(e){
+		$('.table__body').removeClass('validtarget');
+		$('.table__row').removeClass('selected');
 	})
 
-	$(document).on('drag', '#List1 .table__row', function(e) {
-		 if (e.originalEvent.preventDefault) {
-	    e.originalEvent.preventDefault(); // Necessary. Allows us to drop.
-	  }
-	  console.log('Dragging!');
-	});
-
-	$(document).on('drag', '#List2 .table__row', function(e) {
-		 if (e.originalEvent.preventDefault) {
-	    e.originalEvent.preventDefault(); // Necessary. Allows us to drop.
-	  }
-	  console.log('Dragging!');
-	   // See the section on the DataTransfer object.
-
-	});
-
-	$('#List1').on('dragover',function(e){
-		e.originalEvent.dataTransfer.dropEffect = "move";
-	  e.originalEvent.stopPropagation();
-	  e.originalEvent.preventDefault();
-		return false;
-	});
-
-	$('#List2').on('dragover',function(e){
-		e.originalEvent.dataTransfer.dropEffect = "move";
-	  e.originalEvent.stopPropagation();
-	  e.originalEvent.preventDefault();
-		return false;
-	});
-
-	$('#List1').on('drop', function(e){
-		console.log('Freaking Dropped!');
-		dropAlbums();
-		$('#List2 .table__row').removeClass('selected');
-		$('.table__body').removeClass('validtarget');
-		$('.table__body .table__row').attr('draggable', true);
-	});
-
-	$('#List2').on('drop', function(e){
-		console.log('Freaking Drop!');
-		dropAlbums();
-		$('#List1 .table__row').removeClass('selected');
-		$('.table__body').removeClass('validtarget');
-		$('.table__body .table__row').attr('draggable', true);
-	});
-
 	$(document).on('change', 'input[type=checkbox]',function(e){
-		var album_Id = $(this).val(),
-				current_User = $(this).data('user');
+		var album_id = $(this).val(),
+				current_user = $(this).data('user');
 
 		if( !$(this).attr('checked') ){
 
-			if( current_User == active_User || active_User == null) {
+			if( current_user == active_user || active_user == null) {
 
-				active_User = current_User;
+				active_user = current_user;
 				$(this).attr('checked', true);
-				albums_Selected.push(album_Id);
+				albums_selected.push(album_id);
+				console.log('albums on checked', albums_selected)
 				$(this).parent().parent().addClass('selected');
 
-			} else if ( current_User != active_User) {
+			} else if ( current_user != active_user) {
 
-				albums_Selected = [];
+				albums_selected = [];
 				$('.table__row').removeClass('selected');
-				active_User = current_User;
+				active_user = current_user;
 				$(this).attr('checked', true);
-				albums_Selected.push(album_Id);
+				albums_selected.push(album_id);
 				$(this).parent().parent().addClass('selected');
 
 			}
@@ -111,7 +78,7 @@ $(function() {
 
 			$(this).attr('checked', false);
 			$(this).parent().parent().removeClass('selected');
-			albums_Selected.splice( $.inArray(album_Id,albums_Selected),1 );
+			albums_selected.splice( $.inArray(album_id,albums_selected),1 );
 
 		}
 	});
@@ -139,8 +106,8 @@ $(function() {
 		url: URL,
 		dataType: "json",
 		success: function(results) {
-			albums_List = results;
-		  // console.log(albums_List);
+			albums_list = results;
+		  // console.log(albums_list);
 		}
 	  });
 	}
@@ -154,7 +121,7 @@ $(function() {
 		url: URL,
 		dataType: "json",
 		success: function(results) {
-			users_List = results;
+			users_list = results;
 		}
 	  });
 	}
@@ -162,26 +129,26 @@ $(function() {
 	getUsers();
 
 	function countElements(arr) {
-		var num_Elements = 0;
+		var num_elements = 0;
 		for ( var indx in arr ) {
-			num_Elements ++;
+			num_elements ++;
 		}
-		return num_Elements;
+		return num_elements;
 	}
 
 	//Sorts Albums per user Id
 	function loadAlbums(user, element) {
 	  var table = element,
-		  counter = Number(countElements(albums_List));
+		  counter = Number(countElements(albums_list));
 
 		table.empty();
 	  for( var i=0; i < counter; i++) {
-			var id = albums_List[i].userId,
-				album_Id = albums_List[i].id,
-				title = albums_List[i].title;
+			var id = albums_list[i].userId,
+				album_id = albums_list[i].id,
+				title = albums_list[i].title;
 
 			if( user == id) {
-				table.append('<div class="table__row draggable__row" draggable="true" data-album="'+album_Id+'" data-user="'+id+'" data-title="'+title+'"> <div class="table__cell table__cell--short album__id">'+album_Id+'</div> <div class="table__cell table__cell album__name"> '+title+' </div> <label for="album-'+album_Id+'">'+title+' <input class="check__box" type="checkbox" name="album-id" id="album-'+album_Id+'" value="'+album_Id+'" data-user="'+id+'"></label> </div>')
+				table.append('<div id="'+album_id+'" class="table__row draggable__row" draggable="true" data-album="'+album_id+'" data-user="'+id+'" data-title="'+title+'"> <div class="table__cell table__cell--short album__id">'+album_id+'</div> <div class="table__cell table__cell album__name"> '+title+' </div> <label for="album-'+album_id+'">'+title+' <input class="check__box" type="checkbox" name="album-id" id="album-'+album_id+'" value="'+album_id+'" data-user="'+id+'"></label> </div>')
 			}
 	  }
 
@@ -210,10 +177,10 @@ $(function() {
 	// Updating Api Data
 
 	function updatingAlbumList(album, user) {
-		counter = Number(countElements(albums_List));
+		counter = Number(countElements(albums_list));
 		for( var i=0; i < counter; i++ ) {
-			 if ( albums_List[i].id == album ) {
-				albums_List[i].userId = user;
+			 if ( albums_list[i].id == album ) {
+				albums_list[i].userId = user;
 			 }
 		}
 	}
@@ -223,7 +190,7 @@ $(function() {
 			var element = $(this),
 			userId = element.data('user');
 			loadAlbums(userId,element);
-			albums_Selected = [];
+			albums_selected = [];
 		});
 	}
 
@@ -251,21 +218,18 @@ $(function() {
 	}
 
 	function dropAlbums() {
-		albums_Selected.forEach(function(item, index) {
-			console.log('item', item)
-			console.log('index', index)
-			updateAlbums(item, active_User)
+		albums_selected.forEach(function(item, index) {
+
+			updateAlbums(item, active_user)
 		})
 	}
 
 	function droppable_Table(target_List) {
 		console.log(target_List);
 		if( target_List == '#List1') {
-			// $('#List2').attr({ondragenter:'handleDragEnter(e)',ondrop:'handleDrop(e)',ondragover:'handleDragOver(e)'});
 			$('#List1').addClass('validtarget');
 			$('#List1 .table__row').attr('draggable', false);
 		} else if (target_List == '#List2') {
-			// $('#List1').attr({ondragenter:'handleDragEnter(e)',ondragover:'handleDragOver(e)',ondrop:'handleDrop(e)'});
 			$('#List2').addClass('validtarget');
 			$('#List2 .table__row').attr('draggable', false);
 		}
