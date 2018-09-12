@@ -1,75 +1,75 @@
 $(function() {
-	var users_list = [],
-			albums_list = [],
-			albums_selected = [],
-			active_user;
+	var usersList = [],
+			albumsList = [],
+			albumsSelected = [],
+			originList;
 
 	// Filter List of albums available in tables
-	// Filtering in table 1
-	$(document).on('keyup','#album-list1',function(){
-		var selected_Album = $(this).val();
-		filter1(selected_Album);
+	$(document).on('keyup', '.search__input', function() {
+		var listId = $(this).data('search');
+		var enteredKey = $(this).val();
+		filter(listId, enteredKey);
 	});
 
-	// Filtering in table 2
-	$(document).on('keyup','#album-list2',function(){
-		var selected_Album = $(this).val();
-		filter2(selected_Album);
-	});
+	$('.users__list').change(function(){
+		var selectedUser = $(this).find('option:selected').attr('value'),
+				list = $(this).data('select');
+		loadAlbums(selectedUser, list);
+	})
 
-	$(document).on('click', '.drop-albums', function() {
-		dropAlbums();
-	});
+	// Step 7
+	// $(document).on('click', '.drop-albums', function() {
+	// 	dropAlbums();
+	// });
 
-	$(document).on('dragstart', '.draggable__row' ,function (e) {
+	$(document).on('dragstart', '.table__row', function (e) {
     var dt = e.originalEvent.dataTransfer;
     dt.setData('Text', $(this).attr('id'));
     e.originalEvent.dataTransfer.effectAllowed = 'move';
     e.originalEvent.dataTransfer.setData("Text", e.target.getAttribute('id'));
-    console.log(e.originalEvent.dataTransfer.items.length)
-    debugger
     if ( $(this).hasClass('selected') ) {
-			var list = (active_user == 1) ? 2 : 1;
-			target_list = '#List'+list;
-    	droppable_Table(target_list);
+			var list = (originList == "list1") ? "list2" : "list1";
+			targetList = '#'+list;
+    	steDroppableTarget(targetList);
+
     }
     return true;
   });
 
-	$(document).on('dragenter dragover drop', '.table__body',function(e){
-		console.log('albums on drag', albums_selected)
+	$(document).on('dragenter dragover drop', '.table__body', function(e){
 		e.preventDefault();
 		if(e.type === 'drop') {
+			var list = (originList == "list1") ? "list2" : "list1";
+			console.log('Dropped!');
 			dropAlbums();
 		}
 	});
 
-	$(document).on('dragend','.draggable__row', function(e){
+	$(document).on('dragend','.table__row', function(e){
 		$('.table__body').removeClass('validtarget');
 		$('.table__row').removeClass('selected');
 	})
 
 	$(document).on('change', 'input[type=checkbox]',function(e){
-		var album_id = $(this).val(),
-				current_user = $(this).data('user');
+		var albumId = $(this).val(),
+				currentList = $(this).data('list');
 
 		if( !$(this).attr('checked') ){
 
-			if( current_user == active_user || active_user == null) {
+			if( currentList == originList || originList == null) {
 
-				active_user = current_user;
+				originList = currentList;
 				$(this).attr('checked', true);
-				albums_selected.push(album_id);
-				console.log('albums on checked', albums_selected)
+				albumsSelected.push(albumId);
 				$(this).parent().parent().addClass('selected');
 
-			} else if ( current_user != active_user) {
+			} else if ( currentList != originList) {
 
-				albums_selected = [];
+				albumsSelected = [];
 				$('.table__row').removeClass('selected');
-				active_user = current_user;
+				originList = currentList;
 				$(this).attr('checked', true);
-				albums_selected.push(album_id);
+				albumsSelected.push(albumId);
 				$(this).parent().parent().addClass('selected');
 
 			}
@@ -78,23 +78,44 @@ $(function() {
 
 			$(this).attr('checked', false);
 			$(this).parent().parent().removeClass('selected');
-			albums_selected.splice( $.inArray(album_id,albums_selected),1 );
+			albumsSelected.splice( $.inArray(albumId, albumsSelected), 1 );
 
 		}
 	});
 
-	function filter1(e) {
-		var regex = new RegExp('\\b\\w*' + e + '\\w*\\b');
-		$('#List1 .table__row').hide().filter(function () {
+	function filter(listId, enteredKey) {
+		var regex = new RegExp('\\b\\w*' + enteredKey + '\\w*\\b');
+		$('#' +listId+ ' .table__row').hide().filter(function () {
 			return regex.test($(this).data('title'));
 		}).show();
 	}
 
-	function filter2(e) {
-		var regex = new RegExp('\\b\\w*' + e + '\\w*\\b');
-		$('#List2 .table__row').hide().filter(function () {
-			return regex.test($(this).data('title'));
-		}).show();
+	function populateOptions() {
+
+		var selects = document.querySelectorAll('.users__list'),
+				users = Number(countElements(usersList));
+		[].forEach.call(selects, function(select, index) {
+		  for(var i=0; i < users; i++) {
+				select.options[i] = new Option( usersList[i].name, usersList[i].id);
+		  	if ( index == 0 && i == 0 ) {
+		  		select.options[i].setAttribute('selected','true');
+		  	} else if (index == 1 && i== 1 ) {
+		  		select.options[i].setAttribute('selected','true');
+		  	}
+			}
+
+		});
+
+	};
+
+	function populateAlbums() {
+		var tables = document.querySelectorAll('.table__body');
+
+		[].forEach.call(tables, function(table, index) {
+			var user = table.getAttribute('data-user'),
+					list = table.getAttribute('id');
+			loadAlbums(user, list);
+		});
 	}
 
 	// Getting Data from API
@@ -106,8 +127,7 @@ $(function() {
 		url: URL,
 		dataType: "json",
 		success: function(results) {
-			albums_list = results;
-		  // console.log(albums_list);
+			albumsList = results;
 		}
 	  });
 	}
@@ -121,7 +141,9 @@ $(function() {
 		url: URL,
 		dataType: "json",
 		success: function(results) {
-			users_list = results;
+			usersList = results;
+			populateOptions();
+			populateAlbums();
 		}
 	  });
 	}
@@ -129,76 +151,60 @@ $(function() {
 	getUsers();
 
 	function countElements(arr) {
-		var num_elements = 0;
+		var numElements = 0;
 		for ( var indx in arr ) {
-			num_elements ++;
+			numElements ++;
 		}
-		return num_elements;
+		return numElements;
 	}
 
 	//Sorts Albums per user Id
-	function loadAlbums(user, element) {
-	  var table = element,
-		  counter = Number(countElements(albums_list));
+	function loadAlbums(user,table) {
+	  var counter = Number(countElements(albumsList));
 
-		table.empty();
+		$('#' +table).empty();
 	  for( var i=0; i < counter; i++) {
-			var id = albums_list[i].userId,
-				album_id = albums_list[i].id,
-				title = albums_list[i].title;
+			var id = albumsList[i].userId,
+				albumId = albumsList[i].id,
+				title = albumsList[i].title;
 
 			if( user == id) {
-				table.append('<div id="'+album_id+'" class="table__row draggable__row" draggable="true" data-album="'+album_id+'" data-user="'+id+'" data-title="'+title+'"> <div class="table__cell table__cell--short album__id">'+album_id+'</div> <div class="table__cell table__cell album__name"> '+title+' </div> <label for="album-'+album_id+'">'+title+' <input class="check__box" type="checkbox" name="album-id" id="album-'+album_id+'" value="'+album_id+'" data-user="'+id+'"></label> </div>')
+				$('#' +table).append('<div id="'+albumId+'" class="table__row draggable__row" draggable="true" data-album="'+albumId+'" data-user="'+id+'" data-title="'+title+'" >  <label for="album-'+albumId+'"><span>'+title+'</span> <input class="check__box" type="checkbox" name="album-id" id="album-'+albumId+'" value="'+albumId+'" data-user="'+id+'" data-list="'+table+'"></label> </div>')
 			}
 	  }
 
 	}
 
-	// loads users and albums per user
-	$('div.table__body').each(function getUsers() {
-
-		var element = $(this),
-			user_Id = element.data('user'),
-			URL ="https://jsonplaceholder.typicode.com/users/"+user_Id;
-
-		$.ajax({
-			url: URL,
-			dataType: "json",
-			success: function(results) {
-			  var id =(results.id),
-				  name = (results.name);
-			  element.parent().find('.user_id').html(id);
-			  element.parent().find('.user_name').html(name);
-			  loadAlbums(user_Id,element);
-			}
-	  });
-	});
-
 	// Updating Api Data
 
 	function updatingAlbumList(album, user) {
-		counter = Number(countElements(albums_list));
+		counter = Number(countElements(albumsList));
+
 		for( var i=0; i < counter; i++ ) {
-			 if ( albums_list[i].id == album ) {
-				albums_list[i].userId = user;
+			 if ( albumsList[i].id == album ) {
+				albumsList[i].userId = user;
 			 }
 		}
+
 	}
 
 	function updateTables() {
-		$('div.table__body').each(function(){
-			var element = $(this),
-			userId = element.data('user');
-			loadAlbums(userId,element);
-			albums_selected = [];
+		var tables = document.querySelectorAll('.table__body');
+
+		[].forEach.call(tables, function(table, index) {
+			var user = table.getAttribute('data-user'),
+					list = table.getAttribute('id');
+			loadAlbums(user, list);
+			albumsSelected = [];
 		});
+
 	}
 
 	function updateAlbums(album, user) {
 
 		var URL ="https://jsonplaceholder.typicode.com/albums/"+album,
-				newUserId = (user == 1) ? 2 : 1;
-
+				list = (originList == "list1") ? "list2" : "list1",
+				newUserId = $('#' +list).data('user');
 		$.ajax({
 			url: URL,
 			method: 'PUT',
@@ -210,28 +216,26 @@ $(function() {
 			},
 			success: function(response) {
 				var userId = response.userId;
-				updatingAlbumList(album, userId); // run on dragging ?
-				updateTables(); //run on dropping ?
+				updatingAlbumList(album, userId);
+				updateTables();
 			}
 		});
 
 	}
 
 	function dropAlbums() {
-		albums_selected.forEach(function(item, index) {
-
-			updateAlbums(item, active_user)
+		albumsSelected.forEach(function(item, index) {
+			updateAlbums(item, originList)
 		})
 	}
 
-	function droppable_Table(target_List) {
-		console.log(target_List);
-		if( target_List == '#List1') {
-			$('#List1').addClass('validtarget');
-			$('#List1 .table__row').attr('draggable', false);
-		} else if (target_List == '#List2') {
-			$('#List2').addClass('validtarget');
-			$('#List2 .table__row').attr('draggable', false);
+	function steDroppableTarget(targetList) {
+		if( targetList == '#list1') {
+			$('#list1').addClass('validtarget');
+			$('#list1 .table__row').attr('draggable', false);
+		} else if (targetList == '#list2') {
+			$('#list2').addClass('validtarget');
+			$('#list2 .table__row').attr('draggable', false);
 		}
 	}
 

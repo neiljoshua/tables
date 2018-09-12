@@ -13,34 +13,22 @@
 <body>
 	<h1>Vaynermedia Front-End Code Test</h1>
 
-	<div class='search'>
-		<div class="search__divider">
-		<input id="album-list1" class='search__input' type='text' placeholder="Search Albums">
-		</div>
-		<div class="search__divider">
-		<input id="album-list2" class='search__input' type='text' placeholder="Search Albums"></input>
-		</div>
-	</div>
-
 	<main>
+
 		<div id="table1" class='table'>
-			<div class='table__row table__header'>
-				<div class='table__cell table__cell--short user_id'>id</div>
-				<div class='table__cell user_name'>title</div>
-			</div>
-			 <div id="List1" class="table__body" data-user="1"></div>
+			<select class="users__list" data-select="list1"></select>
+			<input id="album-list1" class='search__input' data-search="list1" type='text' placeholder="Search Albums">
+			 <div id="list1" class="table__body" data-user="1"></div>
 		</div>
 
 
 		<div id="table2" class='table'>
-			<div class='table__row table__header'>
-				<div class='table__cell table__cell--short user_id'>id</div>
-				<div class='table__cell user_name'>title</div>
-			</div>
-			<div id="List2" class="table__body" data-user="2"></div>
+			<select class="users__list" data-select="list2"></select>
+			<input id="album-list1" class='search__input' data-search="list2" type='text' placeholder="Search Albums">
+			<div id="list2" class="table__body" data-user="2"></div>
 		</div>
 
-		<button class="drop-albums">Swap Albums</button>
+		<!-- <button class="drop-albums">Swap Albums</button> -->
 
 	</main>
 </body>

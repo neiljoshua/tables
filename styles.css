@@ -3,6 +3,10 @@
 	appearance: none;
 }
 
+input:-webkit-autofill {
+    -webkit-box-shadow: inset 0 0 0px 9999px white;
+}
+
 body {
     font-family: 'Helvetica', 'Arial', sans-serif;
     padding: 0 50px;
@@ -24,58 +28,50 @@ h1 {
    justify-content: space-between;
 }
 
-.search__divider {
-		width: 48%;
-   	align-items: middle;
+select.users__list {
+	display: block;
+	width: calc(100% - 40px);
+	margin: 20px;
+	text-indent: 5px;
+}
+
+option {
+	padding:10px;
+}
+
+select::-ms-expand {
+  display: none;
 }
 
 .search__input {
-		width: 250px;
-    margin: 40px 0;
-    padding: 5px;
-    border-bottom: 1px solid #333;
+	display: flex;
+  padding: 10px;
+  margin: 40px 20px 10px;
+	width: calc(100% - 64px);
 }
 
 .table {
-    width: 48%;
+    width: calc(48% - 40px) ;
+    padding: 20px;
     border: 1px solid #333;
     background-color: white;
 }
-.table__header {
-    background-color: #333;
-    font-weight: bold;
-    color: white;
+
+.table__body {
+	display: block;
+	padding: 20px;
 }
 
 .table__row {
-    display: flex;
-    padding: 5px;
-    border-bottom: 1px solid #333;
-    position: relative;
-}
-.table__row:last-child {
-    border-bottom: 0
-}
-
-.table__cell {
-    margin-right: 10px;
-}
-
-.table__cell--short {
-    flex-shrink: 0;
-    width: 50px;
-}
-.table__cell:last-child {
-    margin-right: 0px;
-}
-
-..table__body.over {
-  border: 2px dashed #000;
+		display: flex;
+		padding: 5px;
+		border-bottom: 1px solid #333;
+		position: relative;
 }
 
 .table__body .table__row {
 	cursor: move;
-	padding: 5px;
+	padding: 10px;
 }
 
 .table__body .table__row:hover {
@@ -86,36 +82,32 @@ h1 {
 	background-color: #A288A6;
 }
 
-.highlighted {
-  background-color: yellow;
-}
-
 .validtarget {
   background-color: lightblue;
-}
-
-.drop-albums {
-	display: block;
-	width: 500px;
-	height: 40px;
-	margin-top: 40px;
+  border: 1px dashed #fff;
+  outline:1px dashed #000;
+  outline-offset:-5px;
 }
 
 label {
-	font-size: 0;
+	font-size: 18px;
 }
+
 .check__box {
 	position: absolute;
-	top: 10px;
-	right: 10px;
-	height: 10px;
-	width: 10px;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 100%;
+	width: 100%;
 	font-size: 0;
 	border: 1px solid #A288A6;
 	z-index: 1000;
 }
 
-.check__box:check {
+.check__box:checked {
+	background-color: #A288A6;
+	opacity: 0.5;
 	color: white;
 }
 
